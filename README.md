@@ -38,3 +38,5 @@ python -m src
 - Python 3.8+
 - aiogram 3.10.0
 - SQLite база данных
+## Deployment status
+MVP ready for deploy � 2025-08-13
