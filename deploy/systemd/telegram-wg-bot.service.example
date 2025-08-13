@@ -1,0 +1,98 @@
+# /etc/systemd/system/telegram-wg-bot.service
+# ЖЕЛЕЗОБЕТОННЫЙ systemd unit с максимальной безопасностью
+
+[Unit]
+Description=Telegram WireGuard Bot (Production Hardened)
+After=network-online.target
+Wants=network-online.target
+Documentation=https://github.com/YOUR_USERNAME/telegram-wg-bot
+
+[Service]
+Type=simple
+User=wg-bot
+Group=wg-bot
+WorkingDirectory=/opt/telegram-wg-bot
+
+# 🔐 СЕКРЕТЫ И ПЕРЕМЕННЫЕ
+EnvironmentFile=/etc/telegram-wg-bot/.env
+Environment=PATH=/opt/telegram-wg-bot/venv/bin
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONDONTWRITEBYTECODE=1
+
+# 🚀 ЗАПУСК
+ExecStart=/opt/telegram-wg-bot/venv/bin/python -X utf8 -O main.py
+ExecReload=/bin/kill -HUP $MAINPID
+
+# 🔄 НАДЕЖНОСТЬ
+Restart=on-failure
+RestartSec=5
+TimeoutStartSec=60
+TimeoutStopSec=30
+KillSignal=SIGINT
+KillMode=mixed
+WatchdogSec=60
+
+# 📁 АВТОМАТИЧЕСКИЕ ДИРЕКТОРИИ (вместо tmpfiles.d)
+StateDirectory=telegram-wg-bot
+LogsDirectory=telegram-wg-bot
+StateDirectoryMode=0750
+LogsDirectoryMode=0750
+
+# 🛡️ БАЗОВЫЕ ОГРАНИЧЕНИЯ БЕЗОПАСНОСТИ
+NoNewPrivileges=true
+UMask=0077
+
+# 🏠 ИЗОЛЯЦИЯ ФАЙЛОВОЙ СИСТЕМЫ
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+ProtectHostname=true
+ProtectClock=true
+
+# 👁️ ИЗОЛЯЦИЯ ПРОЦЕССОВ
+ProtectProc=invisible
+ProcSubset=pid
+PrivateUsers=false
+
+# 🔗 СЕТЕВЫЕ ОГРАНИЧЕНИЯ
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+SocketBindDeny=any
+SocketBindAllow=tcp:8080
+
+# 🚫 СИСТЕМНЫЕ ВЫЗОВЫ И ВОЗМОЖНОСТИ
+SystemCallFilter=~@mount @swap @module @raw-io @reboot @clock @debug @obsolete
+SystemCallErrorNumber=EPERM
+RestrictSUIDSGID=true
+RestrictNamespaces=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+# 🔑 УДАЛЕНИЕ CAPABILITIES
+CapabilityBoundingSet=
+AmbientCapabilities=
+RemoveIPC=true
+
+# 📝 ЛОГИРОВАНИЕ (только journald)
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=telegram-wg-bot
+SyslogLevel=info
+
+# 📂 РАЗРЕШЕННЫЕ ПУТИ ДЛЯ ЗАПИСИ
+ReadWritePaths=/var/lib/telegram-wg-bot /var/log/telegram-wg-bot /etc/wireguard/clients
+
+# ⚡ РЕСУРСНЫЕ ОГРАНИЧЕНИЯ
+LimitNOFILE=65536
+LimitNPROC=100
+MemoryHigh=512M
+MemoryMax=1G
+TasksMax=50
+
+[Install]
+WantedBy=multi-user.target

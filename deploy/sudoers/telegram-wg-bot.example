@@ -1,0 +1,14 @@
+# /etc/sudoers.d/telegram-wg-bot
+# МИНИМАЛЬНЫЕ права для WireGuard операций
+
+# ✅ РАЗРЕШЕННЫЕ КОМАНДЫ (строго ограничены)
+wg-bot ALL=(root) NOPASSWD: /usr/local/bin/wg-manager list
+wg-bot ALL=(root) NOPASSWD: /usr/local/bin/wg-manager help
+wg-bot ALL=(root) NOPASSWD: /usr/local/bin/wg-manager status
+wg-bot ALL=(root) NOPASSWD: /usr/local/bin/wg-manager add [a-zA-Z0-9_-]*
+wg-bot ALL=(root) NOPASSWD: /usr/local/bin/wg-manager remove [a-zA-Z0-9_-]*
+wg-bot ALL=(root) NOPASSWD: /usr/local/bin/wg-manager export [a-zA-Z0-9_-]*
+
+# 🚫 ВСЕ ОСТАЛЬНОЕ ЗАПРЕЩЕНО
+# Defaults:wg-bot !lecture
+# Defaults:wg-bot timestamp_timeout=5
