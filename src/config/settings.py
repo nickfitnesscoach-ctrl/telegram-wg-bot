@@ -33,6 +33,11 @@ class Settings:
     COMMAND_TIMEOUT: int = int(os.getenv("COMMAND_TIMEOUT", "30"))
     MAX_COMMANDS_PER_MINUTE: int = int(os.getenv("MAX_COMMANDS_PER_MINUTE", "10"))
     
+    # Logging settings
+    LOG_FILE: str = os.getenv("LOG_FILE", "./logs/bot.log")
+    LOG_MAX_SIZE_MB: int = int(os.getenv("LOG_MAX_SIZE_MB", "10"))
+    LOG_BACKUP_COUNT: int = int(os.getenv("LOG_BACKUP_COUNT", "10"))
+    
     def validate(self) -> None:
         """Validate required settings"""
         if not self.BOT_TOKEN:

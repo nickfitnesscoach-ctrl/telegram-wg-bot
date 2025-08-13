@@ -18,8 +18,7 @@ from aiohttp import ClientTimeout
 from .config.settings import settings
 from .config.logging_config import setup_logging
 
-# Import handlers
-from .bot.handlers import admin, vpn, system
+# Import handlers will be done locally to avoid double import
 
 # Import middlewares
 from .bot.middlewares.logging import LoggingMiddleware
@@ -45,11 +44,12 @@ class TelegramWGBot:
             # Validate settings
             settings.validate()
             
-            # Create bot with timeout configuration for aiogram 3.10.0
+            # Create bot with configuration for aiogram 3.10.0
             self.bot = Bot(
                 token=settings.BOT_TOKEN,
-                timeout=ClientTimeout(total=30, connect=10)
+                parse_mode=ParseMode.HTML
             )
+            # Note: ClientTimeout is set at session level in aiogram 3.10.0
             
             # Create dispatcher
             self.dp = Dispatcher()
@@ -58,18 +58,20 @@ class TelegramWGBot:
             await init_database()
             
             # Import and register middleware (order matters!)
-            from .config.settings import settings
             from .bot.middlewares.allow_only import AllowOnly
             from .bot.middlewares.simple_rate_limit import RateLimit
 
-            # Authentication middleware
+            # Authentication middleware - only for messages
             self.dp.message.middleware(AllowOnly())
             
-            # Rate limiting middleware
+            # Rate limiting middleware - only for messages
             self.dp.message.middleware(RateLimit(per_user_per_min=settings.RATE_LIMIT_PER_MIN))
 
-            # Regular logging (last)
+            # Regular logging - only for messages
             self.dp.message.middleware(LoggingMiddleware())
+            
+            # Import and register handlers locally to avoid double registration
+            from .bot.handlers import system, vpn, admin
             
             # Register handlers
             self.dp.include_router(system.router)
